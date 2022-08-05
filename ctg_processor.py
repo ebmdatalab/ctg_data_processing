@@ -19,8 +19,7 @@ from lib.data_functions import get_data, fda_reg
 #clinicaltrials_raw_clincialtrials_json_2022-07-22.csv.zip
 
 #For initial development, I'll use default headers, but could make this cutomisable.
-#from lib.final_df import make_dataframe, headers
-from lib.test_final_df import make_output, headers
+from lib.final_df import make_output, headers
 
 #Load in the regulatory archive data
 old_fda = 'data/fdaaa_regulatory_snapshot.csv'
@@ -30,6 +29,8 @@ data_path = 'data/data_to_process'
 
 #Get files to process
 files = sorted(os.listdir(data_path))
+if '.DS_Store' in files:
+    files.remove('.DS_Store')
 
 #Also might be nice to check for the zipped-ness of the file
 #Also, would be nice if we can get a file either locally or via a URL?

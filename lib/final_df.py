@@ -1,29 +1,13 @@
 import csv
 import json
-import pandas as pd
-import numpy as np
 from datetime import date
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
 from time import time
 from time import sleep
-from io import StringIO
 
-from lib.helper_functions import is_interventional
-from lib.helper_functions import is_covered_phase
-from lib.helper_functions import is_not_withdrawn
-from lib.helper_functions import is_not_device_feasibility
-from lib.helper_functions import is_covered_intervention
-from lib.helper_functions import is_fda_reg
-from lib.helper_functions import is_old_fda_regulated
-from lib.helper_functions import has_us_loc
-from lib.helper_functions import does_it_exist
-from lib.helper_functions import dict_or_none
-from lib.helper_functions import text_or_none
-from lib.helper_functions import variable_levels
-from lib.helper_functions import str_to_date
-from lib.helper_functions import convert_bools_to_ints
+from lib.helper_functions import *
 
 def make_row(jcs, fda_reg_dict, scrape_date=date.today()):
     """
@@ -265,8 +249,8 @@ def make_row(jcs, fda_reg_dict, scrape_date=date.today()):
     return td
 
 
-def make_dataframe(lines, fda_reg_dict, headers, act_filter=False, scrape_date=date.today()):
-    """Makes the final dataframe for analysis.
+def make_output(lines, fda_reg_dict, headers, act_filter=False, scrape_date=date.today()):
+    """Makes the final CSV output.
 
     Keyword arguments:
     lines -- the raw data to read into python
@@ -278,31 +262,30 @@ def make_dataframe(lines, fda_reg_dict, headers, act_filter=False, scrape_date=d
 
     fda_reg_dict = fda_reg_dict
     writer_time = time()
-    output = StringIO()
-    writer = csv.DictWriter(output, fieldnames=headers)
-    writer.writeheader()
-    c = 0
-    sleep(1)
-    for line in lines:
-        c+=1
-        j = json.loads(line)
-        jcs = j['clinical_study']
-        try:
-            td = make_row(jcs, fda_reg_dict, scrape_date)
-        except Exception as e:
-            import sys
-            raise type(e)(str(e) + '\n' + 'Error trial: {}'.format(td['nct_id'])).with_traceback(sys.exc_info()[2])
-        if act_filter == True:
-            if td["act_flag"] or td["included_pact_flag"]:
+    
+    
+    with open(f'data/output/ctg_output_{scrape_date}.csv', 'w') as f:
+        writer = csv.DictWriter(f, fieldnames=headers)
+        writer.writeheader()
+        c=0
+        sleep(1)
+        for line in lines:
+            j = json.loads(line)
+            jcs = j['clinical_study']
+            try:
+                td = make_row(jcs, fda_reg_dict, scrape_date)
+            except Exception as e:
+                import sys
+                raise type(e)(str(e) + '\n' + 'Error trial: {}'.format(td['nct_id'])).with_traceback(sys.exc_info()[2])
+            if act_filter == True:
+                if td["act_flag"] or td["included_pact_flag"]:
+                    writer.writerow(convert_bools_to_ints(td))
+                    c+=1
+            elif act_filter == False:
                 writer.writerow(convert_bools_to_ints(td))
-        elif act_filter == False:
-            writer.writerow(convert_bools_to_ints(td))
-        trial_time = time() - writer_time
-    output.seek(0)
+                c+=1
     elapsed_time = time() - writer_time
-    df = pd.read_csv(output)
-    print("Finished. {} Trials Processed; Ran in {} Minutes".format(len(df), round(elapsed_time/60.0)))
-    return df
+    print("Finished. {} Trials Processed; Ran in {} Minutes".format(c, round(elapsed_time/60.0)))
 
 headers = ['nct_id', 
            'act_flag', 

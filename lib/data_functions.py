@@ -31,7 +31,7 @@ def get_data(path, file, zipped=False):
                 return lines
 
     else:
-        with open(path, 'r') as ctgov:
+        with open(path + '/' + file, 'r') as ctgov:
             lines = ctgov.readlines()
             return lines
     
