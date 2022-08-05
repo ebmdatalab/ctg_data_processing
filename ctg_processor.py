@@ -1,11 +1,8 @@
 from datetime import date, datetime
-import pandas as pd
 from time import time
-import re
 import os
-from pathlib import Path
-import sys
 from zipfile import ZipFile
+import gc
 
 from tqdm.auto import tqdm
 
@@ -22,7 +19,8 @@ from lib.data_functions import get_data, fda_reg
 #clinicaltrials_raw_clincialtrials_json_2022-07-22.csv.zip
 
 #For initial development, I'll use default headers, but could make this cutomisable.
-from lib.final_df import make_dataframe, headers
+#from lib.final_df import make_dataframe, headers
+from lib.test_final_df import make_output, headers
 
 #Load in the regulatory archive data
 old_fda = 'data/fdaaa_regulatory_snapshot.csv'
@@ -36,8 +34,8 @@ files = sorted(os.listdir(data_path))
 #Also might be nice to check for the zipped-ness of the file
 #Also, would be nice if we can get a file either locally or via a URL?
 for fi in files:
-    
-    #These steps depend on the file name being the standard format to get the dates
+    print(f'Processing File {fi}')
+    #Making sc_date depends on the file name being the standard format to get the dates
     
     if '.zip' in fi:
         lines = get_data(data_path, fi, zipped=True)
@@ -48,9 +46,14 @@ for fi in files:
     
     #For now, lets just do it with the act_filter off for testing. Can do fancy things later.
     #Ideally, I should probably eventually move this to CSV writer as it will be much lower overhead than pandas
-    df = make_dataframe(tqdm(lines), fda_reg_dict, headers, act_filter=False, scrape_date = sc_date)
+    #df = make_dataframe(tqdm(lines), fda_reg_dict, headers, act_filter=False, scrape_date = sc_date)
+    make_output(tqdm(lines), fda_reg_dict, headers, act_filter=False, scrape_date = sc_date)
     
+    del lines
+    gc.collect()
+    
+    print(f'Completed File {fi}')
     #Will also need to find a way to make this dynamic
-    df.to_csv(f'data/output/ctgov_output_{sc_date}.csv')
+    #df.to_csv(f'data/output/ctgov_output_{sc_date}.csv')
     
     
