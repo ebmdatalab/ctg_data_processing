@@ -32,6 +32,10 @@ files = sorted(os.listdir(data_path))
 if '.DS_Store' in files:
     files.remove('.DS_Store')
 
+for f in files:
+    if '.txt' in f:
+        files.remove(f)
+
 #Also might be nice to check for the zipped-ness of the file
 #Also, would be nice if we can get a file either locally or via a URL?
 for fi in files:
