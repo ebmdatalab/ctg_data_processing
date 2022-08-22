@@ -138,9 +138,9 @@ def make_row(jcs, fda_reg_dict, scrape_date=date.today()):
     else:
         first_submitted_pending = None
 
-    #official due date is at 1 year, however we do not officially call a trial due until 30 days late
+    #official due date is at 1 year, however we do not officially call a trial due until 30 days late on the FDAAA TT
     #this conservatively allows for any delays to the posting process
-    #however for certain analyses, we need the actual due date
+    #however for most analyses, we need the actual due date
     if (td["act_flag"] == True or td["included_pact_flag"] == True):
         td['due_date'] = td["available_completion_date"] + relativedelta(years=1)
     else:
@@ -156,7 +156,6 @@ def make_row(jcs, fda_reg_dict, scrape_date=date.today()):
                 scrape_date
                 > td["available_completion_date"]
                 + relativedelta(years=3)
-                + timedelta(days=30)
             )
         )
     ):
