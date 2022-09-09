@@ -245,7 +245,28 @@ def make_row(jcs, fda_reg_dict, scrape_date=date.today()):
         td["defaulted_date"] = True
     else:
         td["defaulted_date"] = False
+
+    td['minimum_age'] = fix_ages(text_or_none(jcs,['eligibility','minimum_age']))
+
+    td['maximum_age'] = fix_ages(text_or_none(jcs,['eligibility','maximum_age']))
+
+    td['condition'] = text_or_none(jcs, ['condition'])
+
+    try:
+        if isinstance(jcs['enrollment'], dict):
+            td['enrollment'] = text_or_none(jcs, ['enrollment', 'text'])
+            td['enrollment_type'] = text_or_none(jcs, ['enrollment', 'type'])
+        elif isinstance(jcs['enrollment'], int):
+            td['enrollment'] = jcs['enrollment']
+            td['enrollment_type'] = None
+        elif jcs['enrollment'] == '0':
+            td['enrollment'] = 0
+            td['enrollment_type'] = None
+    except KeyError:
+        td['enrollment'] = td['enrollment_type'] = None
+    
     return td
+
 
 
 def make_output(lines, fda_reg_dict, headers, act_filter=False, scrape_date=date.today()):
@@ -329,4 +350,9 @@ headers = ['nct_id',
            'used_primary_completion_date', 
            'defaulted_pcd_flag', 
            'defaulted_cd_flag', 
-           'intervention_types']
+           'intervention_types',
+           'minimum_age',
+           'maximum_age',
+           'condition',
+           'enrollment',
+           'enrollment_type']

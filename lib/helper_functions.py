@@ -119,3 +119,15 @@ def loc_counter(locs):
             if us_loc in locs:
                 counter += 1
     return counter
+
+def fix_ages(x):
+    if x:
+        if 'Years' in x:
+            return int(x.replace(' Years',''))
+        elif 'Year' in x:
+            return int(x.replace(' Year',''))
+        elif 'Weeks' in x:
+            a = int(x.replace(' Weeks','')) / 52
+            return a
+    else:
+        return None
